@@ -1,0 +1,9 @@
+#JSGF V1.0;
+
+grammar bender;
+
+<start_command> = hey bender | hi bender | hello bender;
+<exit_command> = exit [[the] program] | quit [[the] program];
+<song_command> = [play | sing] [a] song;
+public <command> = <start_command> | <exit_command>
+                 | <song_command>;
