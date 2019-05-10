@@ -3,7 +3,10 @@
 grammar bender;
 
 <start_command> = hey bender | hi bender | hello bender;
+<shutdown_command> = shutdown;
 <exit_command> = exit [[the] program] | quit [[the] program];
-<song_command> = [play | sing] [a] song;
-public <command> = <start_command> | <exit_command>
-                 | <song_command>;
+<sing_command> = sing [[a] song];
+<birthplace_command> = where (are you from | were you born);
+<birthdate_command> = when were you born | date of your birth;
+public <command> = <start_command> | <exit_command> | <shutdown_command>
+                 | <birthplace_command> | <birthdate_command> | <sing_command>;

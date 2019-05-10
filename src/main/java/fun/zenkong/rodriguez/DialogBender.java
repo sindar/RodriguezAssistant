@@ -31,10 +31,16 @@ public class DialogBender {
     private static final Map<String, String> AUDIO_FILES =
             new HashMap<String, String>();
 
+    private static final String AUDIO_PATH = "./audio/";;
+
     static {
-        AUDIO_FILES.put("exit", "audio/with_bjah.wav");
-        AUDIO_FILES.put("hey bender", "audio/bite.wav");
-        AUDIO_FILES.put("unrecognized", "audio/beat_children.wav");
+        AUDIO_FILES.put("shutdown", "with_bjah.wav");
+        AUDIO_FILES.put("hey bender", "bite.wav");
+        AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
+        AUDIO_FILES.put("birthdate", "birthdate.wav");
+        AUDIO_FILES.put("sing", "mountain_song.wav");
+        AUDIO_FILES.put("exit", "can_do.wav");
+        AUDIO_FILES.put("unrecognized", "beat_children.wav");
     }
 
     public static void main(String[] args) throws Exception {
@@ -59,10 +65,24 @@ public class DialogBender {
                     System.out.println("Say: \"Hey Bender!\"");
                 case 1:
                     command = recognizeCommand(jsgfRecognizer);
-                    if (command.equals("exit")) {
-                        fsmState = 10;
-                    } else if (command.equals("hey bender")) {
+                    if (command.equals("hey bender")) {
                         fsmState = 2;
+                        try {
+                            playAudio(AUDIO_FILES.get(command));
+                        }
+                        catch (Exception ex) {
+                            System.out.println("Error with playing sound.");
+                            ex.printStackTrace();
+                            fsmState = 0;
+                        }
+                    }
+                    break;
+                case 2:
+                    command = recognizeCommand(jsgfRecognizer);
+                    if (command.equals("shutdown")) {
+                        fsmState = 10;
+                    } else if (command.equals("exit")) {
+                        fsmState = 0;
                     }
                     try {
                         playAudio(AUDIO_FILES.get(command));
@@ -72,9 +92,6 @@ public class DialogBender {
                         ex.printStackTrace();
                         fsmState = 0;
                     }
-                    break;
-                case 2:
-                    fsmState = 1;
                     break;
                 case 10:
                     return;
@@ -91,20 +108,31 @@ public class DialogBender {
         System.out.println(utterance);
 
         String command = "unrecognized";
-        if (utterance.startsWith("exit")) {
+        if (utterance.startsWith("shutdown")) {
+            command = "shutdown";
+        } else if (utterance.startsWith("exit")
+                    || utterance.startsWith("quit")) {
             command = "exit";
+        } else if (utterance.startsWith("sing")) {
+            command = "sing";
+        } else if (utterance.contains("where are you from")
+                    || utterance.contains("where were you born")){
+            command = "birthplace";
+        } else if (utterance.contains("when were you born")
+                    || utterance.contains("birth")) {
+            command = "birthdate";
         } else if (utterance.endsWith("bender")) {
             command = "hey bender";
         }
         return command;
     }
 
-    private static void playAudio(String filePath)
+    private static void playAudio(String fileName)
             throws UnsupportedAudioFileException, IOException,
             LineUnavailableException, InterruptedException
     {
         AudioInputStream audioInputStream =
-                AudioSystem.getAudioInputStream(new File(filePath).getAbsoluteFile());
+                AudioSystem.getAudioInputStream(new File(AUDIO_PATH + fileName).getAbsoluteFile());
         clip = AudioSystem.getClip();
         clip.open(audioInputStream);
         clip.start();
