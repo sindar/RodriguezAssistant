@@ -38,6 +38,7 @@ public class DialogBender {
         AUDIO_FILES.put("hey bender", "bite.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
         AUDIO_FILES.put("birthdate", "birthdate.wav");
+        AUDIO_FILES.put("animal", "turtle.wav");
         AUDIO_FILES.put("sing", "mountain_song.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
@@ -73,7 +74,7 @@ public class DialogBender {
                         catch (Exception ex) {
                             System.out.println("Error with playing sound.");
                             ex.printStackTrace();
-                            fsmState = 0;
+                            fsmState = 10;
                         }
                     }
                     break;
@@ -90,7 +91,7 @@ public class DialogBender {
                     catch (Exception ex) {
                         System.out.println("Error with playing sound.");
                         ex.printStackTrace();
-                        fsmState = 0;
+                        fsmState = 10;
                     }
                     break;
                 case 10:
@@ -121,6 +122,8 @@ public class DialogBender {
         } else if (utterance.contains("when were you born")
                     || utterance.contains("birth")) {
             command = "birthdate";
+        } else if (utterance.endsWith("your favorite animal")) {
+            command = "animal";
         } else if (utterance.endsWith("bender")) {
             command = "hey bender";
         }

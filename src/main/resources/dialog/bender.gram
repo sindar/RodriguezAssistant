@@ -6,7 +6,14 @@ grammar bender;
 <shutdown_command> = shutdown;
 <exit_command> = exit [[the] program] | quit [[the] program];
 <sing_command> = sing [[a] song];
-<birthplace_command> = where (are you from | were you born);
-<birthdate_command> = when were you born | date of your birth;
+
+<birthplace_question> = where (are you from | were you born);
+<birthdate_qustion> = when were you born | date of your birth;
+<favorite_animal_question> = [what[s] [is]] your favorite animal;
+
+public <common_questions> = <birthplace_question> | <birthdate_qustion>
+                            | <favorite_animal_question> ;
+
 public <command> = <start_command> | <exit_command> | <shutdown_command>
-                 | <birthplace_command> | <birthdate_command> | <sing_command>;
+                    | <sing_command>
+                    ;
