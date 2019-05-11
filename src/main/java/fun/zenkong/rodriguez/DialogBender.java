@@ -38,6 +38,7 @@ public class DialogBender {
         AUDIO_FILES.put("hey bender", "bite.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
         AUDIO_FILES.put("birthdate", "birthdate.wav");
+        AUDIO_FILES.put("who are you", "bender_song.wav");
         AUDIO_FILES.put("animal", "turtle.wav");
         AUDIO_FILES.put("sing", "mountain_song.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
@@ -116,8 +117,10 @@ public class DialogBender {
             command = "exit";
         } else if (utterance.startsWith("sing")) {
             command = "sing";
+        } else if (utterance.contains("who are you")) {
+            command = "who are you";
         } else if (utterance.contains("where are you from")
-                    || utterance.contains("where were you born")){
+                    || utterance.contains("where were you born")) {
             command = "birthplace";
         } else if (utterance.contains("when were you born")
                     || utterance.contains("birth")) {
