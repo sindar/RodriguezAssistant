@@ -2,6 +2,7 @@ package fun.zenkong.rodriguez;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +39,8 @@ public class DialogBender {
         AUDIO_FILES.put("hey bender", "bite.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
         AUDIO_FILES.put("birthdate", "birthdate.wav");
-        AUDIO_FILES.put("who are you", "bender_song.wav");
+        AUDIO_FILES.put("who are you 0", "im_bender.wav");
+        AUDIO_FILES.put("who are you 1", "bender_song.wav");
         AUDIO_FILES.put("animal", "turtle.wav");
         AUDIO_FILES.put("sing", "mountain_song.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
@@ -108,6 +110,7 @@ public class DialogBender {
         String utterance = jsgfRecognizer.getResult().getHypothesis();
         jsgfRecognizer.stopRecognition();
         System.out.println(utterance);
+        long curTime = new Date().getTime();
 
         String command = "unrecognized";
         if (utterance.startsWith("shutdown")) {
@@ -118,7 +121,8 @@ public class DialogBender {
         } else if (utterance.startsWith("sing")) {
             command = "sing";
         } else if (utterance.contains("who are you")) {
-            command = "who are you";
+            long t1 = curTime % 2;
+            command = "who are you " + String.valueOf(t1);
         } else if (utterance.contains("where are you from")
                     || utterance.contains("where were you born")) {
             command = "birthplace";
