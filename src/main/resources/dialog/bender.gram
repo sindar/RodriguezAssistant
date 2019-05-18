@@ -17,5 +17,5 @@ public <common_questions> = <birthplace_question> | <birthdate_question>
                             | <who_are_you_question>;
 
 public <command> = <start_command> | <exit_command> | <shutdown_command>
-                    | <sing_command>
+                    | <sing_command> | magnet
                     ;

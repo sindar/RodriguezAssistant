@@ -42,7 +42,9 @@ public class DialogBender {
         AUDIO_FILES.put("who are you 0", "im_bender.wav");
         AUDIO_FILES.put("who are you 1", "bender_song.wav");
         AUDIO_FILES.put("animal", "turtle.wav");
-        AUDIO_FILES.put("sing", "mountain_song.wav");
+        AUDIO_FILES.put("sing", "bender_song.wav");
+        AUDIO_FILES.put("magnet 0", "roads_song.wav");
+        AUDIO_FILES.put("magnet 1", "mountain_song.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
     }
@@ -111,6 +113,7 @@ public class DialogBender {
         jsgfRecognizer.stopRecognition();
         System.out.println(utterance);
         long curTime = new Date().getTime();
+        long option;
 
         String command = "unrecognized";
         if (utterance.startsWith("shutdown")) {
@@ -121,8 +124,8 @@ public class DialogBender {
         } else if (utterance.startsWith("sing")) {
             command = "sing";
         } else if (utterance.contains("who are you")) {
-            long t1 = curTime % 2;
-            command = "who are you " + String.valueOf(t1);
+            option = curTime % 2;
+            command = "who are you " + String.valueOf(option);
         } else if (utterance.contains("where are you from")
                     || utterance.contains("where were you born")) {
             command = "birthplace";
@@ -133,6 +136,9 @@ public class DialogBender {
             command = "animal";
         } else if (utterance.endsWith("bender")) {
             command = "hey bender";
+        } else if (utterance.contains("magnet")) {
+            option = curTime % 2;
+            command = "magnet " + String.valueOf(option);
         }
         return command;
     }
