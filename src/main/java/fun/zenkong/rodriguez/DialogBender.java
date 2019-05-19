@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.LiveSpeechRecognizer;
@@ -26,13 +28,18 @@ public class DialogBender {
     private static final String GRAMMAR_PATH =
             "resource:/dialog/";
 
-    private static Clip clip;
     private static int fsmState;
 
     private static final Map<String, String> AUDIO_FILES =
             new HashMap<String, String>();
 
     private static final String AUDIO_PATH = "./audio/";;
+
+    private static Timer sleepTimer;
+    private static SleepTimerTask sleepTimerTask;
+
+    private static boolean isPlayingAnswer;
+    private static boolean isSleeping;
 
     static {
         AUDIO_FILES.put("shutdown", "with_bjah.wav");
@@ -46,8 +53,10 @@ public class DialogBender {
         AUDIO_FILES.put("magnet 0", "roads_song.wav");
         AUDIO_FILES.put("magnet 1", "mountain_song.wav");
         AUDIO_FILES.put("new sweater", "new_sweater.wav");
+        AUDIO_FILES.put("kill all humans", "kill_all_humans.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
+        AUDIO_FILES.put("no audio", "silence.wav");
     }
 
     public static void main(String[] args) throws Exception {
@@ -64,7 +73,9 @@ public class DialogBender {
                 new LiveSpeechRecognizer(configuration);
 
         fsmState = 0;
-
+        sleepTimer = null;
+        isPlayingAnswer = false;
+        isSleeping = false;
         while (true) {
             switch (fsmState) {
                 case 0:
@@ -72,32 +83,30 @@ public class DialogBender {
                     System.out.println("Say: \"Hey Bender!\"");
                 case 1:
                     command = recognizeCommand(jsgfRecognizer);
-                    if (command.equals("hey bender")) {
-                        fsmState = 2;
-                        try {
-                            playAudio(AUDIO_FILES.get(command));
-                        }
-                        catch (Exception ex) {
-                            System.out.println("Error with playing sound.");
-                            ex.printStackTrace();
-                            fsmState = 10;
+                    if(command != null) {
+                        if (command.equals("hey bender")) {
+                            fsmState = 2;
+                            playBenderAnswer(command);
                         }
                     }
                     break;
                 case 2:
-                    command = recognizeCommand(jsgfRecognizer);
-                    if (command.equals("shutdown")) {
-                        fsmState = 10;
-                    } else if (command.equals("exit")) {
-                        fsmState = 0;
-                    }
-                    try {
-                        playAudio(AUDIO_FILES.get(command));
-                    }
-                    catch (Exception ex) {
-                        System.out.println("Error with playing sound.");
-                        ex.printStackTrace();
-                        fsmState = 10;
+                    if(!isPlayingAnswer) {
+                        if (sleepTimer == null) {
+                            sleepTimer = new Timer();
+                            sleepTimerTask = new SleepTimerTask();
+                            sleepTimer.schedule(sleepTimerTask, 60000);
+                        }
+
+                        command = recognizeCommand(jsgfRecognizer);
+                        if(command != null) {
+                            if (command.equals("shutdown")) {
+                                fsmState = 10;
+                            } else if (command.equals("exit")) {
+                                fsmState = 0;
+                            }
+                            playBenderAnswer(command);
+                        }
                     }
                     break;
                 case 10:
@@ -112,6 +121,14 @@ public class DialogBender {
         jsgfRecognizer.startRecognition(true);
         String utterance = jsgfRecognizer.getResult().getHypothesis();
         jsgfRecognizer.stopRecognition();
+        if(isPlayingAnswer)
+            return null;
+
+        if(isSleeping) {
+            isSleeping = false;
+            return "kill all humans";
+        }
+
         System.out.println(utterance);
         long curTime = new Date().getTime();
         long option;
@@ -147,17 +164,45 @@ public class DialogBender {
         return command;
     }
 
+    private static void playBenderAnswer(String command) {
+        try {
+            playAudio(AUDIO_FILES.get(command));
+        }
+        catch (Exception ex) {
+            System.out.println("Error with playing sound.");
+            ex.printStackTrace();
+            System.exit(1);
+        }
+
+        if (sleepTimer != null) {
+            sleepTimer.cancel();
+            sleepTimerTask = null;
+            sleepTimer = null;
+        }
+    }
+
     private static void playAudio(String fileName)
             throws UnsupportedAudioFileException, IOException,
             LineUnavailableException, InterruptedException
     {
+
         AudioInputStream audioInputStream =
                 AudioSystem.getAudioInputStream(new File(AUDIO_PATH + fileName).getAbsoluteFile());
+        Clip clip;
         clip = AudioSystem.getClip();
         clip.open(audioInputStream);
         clip.start();
+        isPlayingAnswer = true;
         Thread.sleep(clip.getMicrosecondLength()/1000);
+        isPlayingAnswer = false;
         clip.stop();
         clip.close();
+    }
+
+    static class SleepTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            isSleeping = true;
+        }
     }
 }
