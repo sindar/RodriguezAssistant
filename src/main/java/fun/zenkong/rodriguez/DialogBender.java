@@ -45,6 +45,7 @@ public class DialogBender {
         AUDIO_FILES.put("sing", "bender_song.wav");
         AUDIO_FILES.put("magnet 0", "roads_song.wav");
         AUDIO_FILES.put("magnet 1", "mountain_song.wav");
+        AUDIO_FILES.put("new sweater", "new_sweater.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
     }
@@ -121,7 +122,8 @@ public class DialogBender {
         } else if (utterance.startsWith("exit")
                     || utterance.startsWith("quit")) {
             command = "exit";
-        } else if (utterance.startsWith("sing")) {
+        } else if (utterance.startsWith("sing")
+                    && utterance.contains("song")) {
             command = "sing";
         } else if (utterance.contains("who are you")) {
             option = curTime % 2;
@@ -139,6 +141,8 @@ public class DialogBender {
         } else if (utterance.contains("magnet")) {
             option = curTime % 2;
             command = "magnet " + String.valueOf(option);
+        } else if (utterance.contains("new sweater")) {
+            command = "new sweater";
         }
         return command;
     }
