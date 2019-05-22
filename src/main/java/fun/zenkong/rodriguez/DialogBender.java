@@ -54,6 +54,7 @@ public class DialogBender {
         AUDIO_FILES.put("magnet 1", "mountain_song.wav");
         AUDIO_FILES.put("new sweater", "new_sweater.wav");
         AUDIO_FILES.put("kill all humans", "kill_all_humans.wav");
+        AUDIO_FILES.put("wake up", "most_wonderful_dream.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
         AUDIO_FILES.put("no audio", "silence.wav");
@@ -108,6 +109,17 @@ public class DialogBender {
                             playBenderAnswer(command);
                         }
                     }
+                    if(isSleeping)
+                        fsmState = 3;
+                    break;
+                case 3:
+                    playBenderAnswer("kill all humans");
+                    command = recognizeCommand(jsgfRecognizer);
+                    if(command == "wake up") {
+                        playBenderAnswer(command);
+                        fsmState = 2;
+                        isSleeping = false;
+                    }
                     break;
                 case 10:
                     return;
@@ -123,11 +135,6 @@ public class DialogBender {
         jsgfRecognizer.stopRecognition();
         if(isPlayingAnswer)
             return null;
-
-        if(isSleeping) {
-            isSleeping = false;
-            return "kill all humans";
-        }
 
         System.out.println(utterance);
         long curTime = new Date().getTime();
@@ -160,6 +167,10 @@ public class DialogBender {
             command = "magnet " + String.valueOf(option);
         } else if (utterance.contains("new sweater")) {
             command = "new sweater";
+        } else if ((utterance.contains("wake up")
+                || utterance.contains("awake"))
+                && isSleeping) {
+            command = "wake up";
         }
         return command;
     }
