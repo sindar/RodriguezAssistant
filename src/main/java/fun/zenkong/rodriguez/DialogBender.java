@@ -96,10 +96,14 @@ public class DialogBender {
                         if (sleepTimer == null) {
                             sleepTimer = new Timer();
                             sleepTimerTask = new SleepTimerTask();
-                            sleepTimer.schedule(sleepTimerTask, 60000);
+                            sleepTimer.schedule(sleepTimerTask, 10000);
                         }
 
                         command = recognizeCommand(jsgfRecognizer);
+                        if(isSleeping) {
+                            command = null;
+                            fsmState = 3;
+                        }
                         if(command != null) {
                             if (command.equals("shutdown")) {
                                 fsmState = 10;
@@ -109,8 +113,6 @@ public class DialogBender {
                             playBenderAnswer(command);
                         }
                     }
-                    if(isSleeping)
-                        fsmState = 3;
                     break;
                 case 3:
                     playBenderAnswer("kill all humans");
@@ -176,6 +178,11 @@ public class DialogBender {
     }
 
     private static void playBenderAnswer(String command) {
+        if (sleepTimer != null) {
+            sleepTimer.cancel();
+            sleepTimerTask = null;
+            sleepTimer = null;
+        }
         try {
             playAudio(AUDIO_FILES.get(command));
         }
@@ -183,12 +190,6 @@ public class DialogBender {
             System.out.println("Error with playing sound.");
             ex.printStackTrace();
             System.exit(1);
-        }
-
-        if (sleepTimer != null) {
-            sleepTimer.cancel();
-            sleepTimerTask = null;
-            sleepTimer = null;
         }
     }
 
