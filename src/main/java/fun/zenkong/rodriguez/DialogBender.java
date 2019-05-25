@@ -35,6 +35,8 @@ public class DialogBender {
     private static boolean isPlayingAnswer;
     private static boolean isSleeping;
 
+    private static boolean isSleepEnabled;
+
     private static AudioPlayer audioPlayer = new AudioPlayer();
 
     static {
@@ -52,6 +54,8 @@ public class DialogBender {
         AUDIO_FILES.put("kill all humans", "kill_all_humans.wav");
         AUDIO_FILES.put("wake up", "most_wonderful_dream.wav");
         AUDIO_FILES.put("exit", "can_do.wav");
+        AUDIO_FILES.put("enable", "can_do.wav");
+        AUDIO_FILES.put("disable", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
         AUDIO_FILES.put("no audio", "silence.wav");
     }
@@ -73,6 +77,7 @@ public class DialogBender {
         sleepTimer = null;
         isPlayingAnswer = false;
         isSleeping = false;
+        isSleepEnabled = true;
         while (true) {
             switch (fsmState) {
                 case 0:
@@ -89,14 +94,14 @@ public class DialogBender {
                     break;
                 case 2:
                     if(!isPlayingAnswer) {
-                        if (sleepTimer == null) {
+                        if (isSleepEnabled && sleepTimer == null) {
                             sleepTimer = new Timer();
                             sleepTimerTask = new SleepTimerTask();
                             sleepTimer.schedule(sleepTimerTask, 10000);
                         }
 
                         command = recognizeCommand(jsgfRecognizer);
-                        if(isSleeping) {
+                        if(isSleepEnabled && isSleeping) {
                             command = null;
                             fsmState = 3;
                         }
@@ -105,6 +110,10 @@ public class DialogBender {
                                 fsmState = 10;
                             } else if (command.equals("exit")) {
                                 fsmState = 0;
+                            } else if (command.startsWith("enable")) {
+                                command = "enable";
+                            } else if (command.startsWith("disable")) {
+                                command = "disable";
                             }
                             playBenderAnswer(command);
                         }
@@ -169,6 +178,9 @@ public class DialogBender {
                 || utterance.contains("awake"))
                 && isSleeping) {
             command = "wake up";
+        } else if (utterance.startsWith("enable")
+                || utterance.startsWith("disable")) {
+            command = utterance;
         }
         return command;
     }

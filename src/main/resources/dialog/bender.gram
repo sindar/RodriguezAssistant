@@ -2,11 +2,14 @@
 
 grammar bender;
 
+<parameters> = sleep[ing];
+
 <start_command> = hey bender | hi bender | hello bender;
 <shutdown_command> = shutdown;
 <exit_command> = exit [[the] program] | quit [[the] program];
 <sing_command> = sing [a] song;
 <wake_up_command> = wake up | awake;
+<enable_disable_command> = (enable | disable) [<parameters>];
 
 <birthplace_question> = where (are you from | were you born);
 <birthdate_question> = when were you born | date of your birth;
@@ -20,5 +23,5 @@ public <common_questions> = <birthplace_question> | <birthdate_question>
                             | <who_are_you_question>;
 
 public <command> = <start_command> | <exit_command> | <shutdown_command>
-                    | <sing_command> | <wake_up_command>
+                    | <sing_command> | <wake_up_command> | <enable_disable_command>
                     ;
