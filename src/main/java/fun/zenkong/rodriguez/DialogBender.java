@@ -1,7 +1,5 @@
 package fun.zenkong.rodriguez;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,11 +9,7 @@ import java.util.TimerTask;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.LiveSpeechRecognizer;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import fun.zenkong.rodriguez.AudioPlayer;
 
 public class DialogBender {
 
@@ -40,6 +34,8 @@ public class DialogBender {
 
     private static boolean isPlayingAnswer;
     private static boolean isSleeping;
+
+    private static AudioPlayer audioPlayer = new AudioPlayer();
 
     static {
         AUDIO_FILES.put("shutdown", "with_bjah.wav");
@@ -184,31 +180,15 @@ public class DialogBender {
             sleepTimer = null;
         }
         try {
-            playAudio(AUDIO_FILES.get(command));
+            isPlayingAnswer = true;
+            audioPlayer.playAudio(AUDIO_PATH + AUDIO_FILES.get(command));
+            isPlayingAnswer = false;
         }
         catch (Exception ex) {
             System.out.println("Error with playing sound.");
             ex.printStackTrace();
             System.exit(1);
         }
-    }
-
-    private static void playAudio(String fileName)
-            throws UnsupportedAudioFileException, IOException,
-            LineUnavailableException, InterruptedException
-    {
-
-        AudioInputStream audioInputStream =
-                AudioSystem.getAudioInputStream(new File(AUDIO_PATH + fileName).getAbsoluteFile());
-        Clip clip;
-        clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
-        clip.start();
-        isPlayingAnswer = true;
-        Thread.sleep(clip.getMicrosecondLength()/1000);
-        isPlayingAnswer = false;
-        clip.stop();
-        clip.close();
     }
 
     static class SleepTimerTask extends TimerTask {
