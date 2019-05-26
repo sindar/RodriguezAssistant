@@ -2,6 +2,20 @@
 
 grammar bender;
 
+<digit> = oh    |
+          zero  |
+          one   |
+          two   |
+          three |
+          four  |
+          five  |
+          six   |
+          seven |
+          eight |
+          nine  ;
+
+<number> = <digit>+ [point <digit>+];
+
 <parameters> = sleep[ing];
 
 <start_command> = hey bender | hi bender | hello bender;
@@ -10,6 +24,7 @@ grammar bender;
 <sing_command> = sing [a] song;
 <wake_up_command> = wake up | awake;
 <enable_disable_command> = (enable | disable) [<parameters>];
+<set_command> = set [<parameters>] [to] [<number>];
 
 <birthplace_question> = where (are you from | were you born);
 <birthdate_question> = when were you born | date of your birth;
@@ -23,5 +38,6 @@ public <common_questions> = <birthplace_question> | <birthdate_question>
                             | <who_are_you_question>;
 
 public <command> = <start_command> | <exit_command> | <shutdown_command>
-                    | <sing_command> | <wake_up_command> | <enable_disable_command>
+                    | <sing_command> | <wake_up_command>
+                    | <enable_disable_command> | <set_command>
                     ;

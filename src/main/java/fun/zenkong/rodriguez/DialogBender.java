@@ -42,6 +42,7 @@ public class DialogBender {
 
     static {
         AUDIO_FILES.put("shutdown", "with_bjah.wav");
+        AUDIO_FILES.put("exit", "lets_get_drunk.wav");
         AUDIO_FILES.put("hey bender", "bite.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
         AUDIO_FILES.put("birthdate", "birthdate.wav");
@@ -54,9 +55,9 @@ public class DialogBender {
         AUDIO_FILES.put("new sweater", "new_sweater.wav");
         AUDIO_FILES.put("kill all humans", "kill_all_humans.wav");
         AUDIO_FILES.put("wake up", "most_wonderful_dream.wav");
-        AUDIO_FILES.put("exit", "can_do.wav");
         AUDIO_FILES.put("enable", "can_do.wav");
         AUDIO_FILES.put("disable", "can_do.wav");
+        AUDIO_FILES.put("set", "can_do.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
         AUDIO_FILES.put("no audio", "silence.wav");
     }
@@ -136,6 +137,9 @@ public class DialogBender {
                                 } else {
                                     answer = "unrecognized";
                                 }
+                            } else if (command.startsWith("set")) {
+                                //TODO: add logic
+                                answer = "set";
                             }
                             playBenderAnswer(answer);
                         }
@@ -211,6 +215,8 @@ public class DialogBender {
             command = "wake up";
         } else if (utterance.startsWith("enable")
                 || utterance.startsWith("disable")) {
+            command = utterance;
+        } else if (utterance.startsWith("set")) {
             command = utterance;
         }
         return command;
