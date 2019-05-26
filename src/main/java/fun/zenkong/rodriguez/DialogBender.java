@@ -27,6 +27,9 @@ public class DialogBender {
     private static final Map<String, String> AUDIO_FILES =
             new HashMap<String, String>();
 
+    private static Map<String, String> parameters =
+            new HashMap<String, String>();
+
     private static final String AUDIO_PATH = "./audio/";;
 
     private static Timer sleepTimer;
@@ -34,8 +37,6 @@ public class DialogBender {
 
     private static boolean isPlayingAnswer;
     private static boolean isSleeping;
-
-    private static boolean isSleepEnabled;
 
     private static AudioPlayer audioPlayer = new AudioPlayer();
 
@@ -60,8 +61,14 @@ public class DialogBender {
         AUDIO_FILES.put("no audio", "silence.wav");
     }
 
+    static {
+        parameters.put("sleep", "disable");
+    }
+
     public static void main(String[] args) throws Exception {
         String command;
+        String answer;
+        String parameter;
         Configuration configuration = new Configuration();
         configuration.setAcousticModelPath(ACOUSTIC_MODEL);
         configuration.setDictionaryPath(DICTIONARY_PATH);
@@ -77,7 +84,6 @@ public class DialogBender {
         sleepTimer = null;
         isPlayingAnswer = false;
         isSleeping = false;
-        isSleepEnabled = true;
         while (true) {
             switch (fsmState) {
                 case 0:
@@ -88,34 +94,50 @@ public class DialogBender {
                     if(command != null) {
                         if (command.equals("hey bender")) {
                             fsmState = 2;
-                            playBenderAnswer(command);
+                            answer = command;
+                            playBenderAnswer(answer);
                         }
                     }
                     break;
                 case 2:
                     if(!isPlayingAnswer) {
-                        if (isSleepEnabled && sleepTimer == null) {
+                        if (parameters.get("sleep") == "enable"
+                                && sleepTimer == null) {
                             sleepTimer = new Timer();
                             sleepTimerTask = new SleepTimerTask();
                             sleepTimer.schedule(sleepTimerTask, 10000);
                         }
 
                         command = recognizeCommand(jsgfRecognizer);
-                        if(isSleepEnabled && isSleeping) {
+                        if(parameters.get("sleep") == "enable"
+                                && isSleeping) {
                             command = null;
                             fsmState = 3;
                         }
                         if(command != null) {
+                            answer = command;
                             if (command.equals("shutdown")) {
+                                answer = "shutdown";
                                 fsmState = 10;
                             } else if (command.equals("exit")) {
+                                answer = "exit";
                                 fsmState = 0;
-                            } else if (command.startsWith("enable")) {
-                                command = "enable";
-                            } else if (command.startsWith("disable")) {
-                                command = "disable";
+                            } else if (command.startsWith("enable")
+                                       || command.startsWith("disable")) {
+                                String parValue;
+                                if (command.startsWith("enable"))
+                                    parValue = "enable";
+                                else
+                                    parValue = "disable";
+                                parameter = getParameterFromCommand(command);
+                                if(parameter != null) {
+                                    parameters.replace(parameter, parValue);
+                                    answer = parValue;
+                                } else {
+                                    answer = "unrecognized";
+                                }
                             }
-                            playBenderAnswer(command);
+                            playBenderAnswer(answer);
                         }
                     }
                     break;
@@ -123,7 +145,8 @@ public class DialogBender {
                     playBenderAnswer("kill all humans");
                     command = recognizeCommand(jsgfRecognizer);
                     if(command == "wake up") {
-                        playBenderAnswer(command);
+                        answer = command;
+                        playBenderAnswer(answer);
                         fsmState = 2;
                         isSleeping = false;
                     }
@@ -131,6 +154,14 @@ public class DialogBender {
                 case 10:
                     return;
             }
+        }
+    }
+
+
+    static class SleepTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            isSleeping = true;
         }
     }
 
@@ -203,10 +234,15 @@ public class DialogBender {
         }
     }
 
-    static class SleepTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            isSleeping = true;
-        }
+    private static String getParameterFromCommand(String command)
+            throws NullPointerException {
+        String cur_parameter = null;
+        if(command.contains("sleep") || command.contains("sleeping"))
+            cur_parameter = "sleep";
+        if (parameters.containsKey(cur_parameter))
+            return cur_parameter;
+        else
+            return null;
     }
+
 }
