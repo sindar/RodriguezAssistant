@@ -9,8 +9,6 @@ import java.util.TimerTask;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.LiveSpeechRecognizer;
 
-import fun.zenkong.rodriguez.AudioPlayer;
-
 public class DialogBender {
 
     private static final String ACOUSTIC_MODEL =
@@ -21,8 +19,6 @@ public class DialogBender {
             "resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin";
     private static final String GRAMMAR_PATH =
             "resource:/dialog/";
-
-    private static int fsmState;
 
     private static final Map<String, String> AUDIO_FILES =
             new HashMap<String, String>();
@@ -67,9 +63,6 @@ public class DialogBender {
     }
 
     public static void main(String[] args) throws Exception {
-        String command;
-        String answer;
-        String parameter;
         Configuration configuration = new Configuration();
         configuration.setAcousticModelPath(ACOUSTIC_MODEL);
         configuration.setDictionaryPath(DICTIONARY_PATH);
@@ -81,6 +74,8 @@ public class DialogBender {
         LiveSpeechRecognizer jsgfRecognizer =
                 new LiveSpeechRecognizer(configuration);
 
+        int fsmState;
+
         fsmState = 0;
         sleepTimer = null;
         isPlayingAnswer = false;
@@ -91,14 +86,7 @@ public class DialogBender {
                     fsmState = 1;
                     System.out.println("Say: \"Hey Bender!\"");
                 case 1:
-                    command = recognizeCommand(jsgfRecognizer);
-                    if(command != null) {
-                        if (command.equals("hey bender")) {
-                            fsmState = 2;
-                            answer = command;
-                            playBenderAnswer(answer);
-                        }
-                    }
+                    fsmState = processCommand(jsgfRecognizer, fsmState);
                     break;
                 case 2:
                     if(!isPlayingAnswer) {
@@ -108,52 +96,11 @@ public class DialogBender {
                             sleepTimerTask = new SleepTimerTask();
                             sleepTimer.schedule(sleepTimerTask, 10000);
                         }
-
-                        command = recognizeCommand(jsgfRecognizer);
-                        if(parameters.get("sleep") == "enable"
-                                && isSleeping) {
-                            command = null;
-                            fsmState = 3;
-                        }
-                        if(command != null) {
-                            answer = command;
-                            if (command.equals("shutdown")) {
-                                answer = "shutdown";
-                                fsmState = 10;
-                            } else if (command.equals("exit")) {
-                                answer = "exit";
-                                fsmState = 0;
-                            } else if (command.startsWith("enable")
-                                       || command.startsWith("disable")) {
-                                String parValue;
-                                if (command.startsWith("enable"))
-                                    parValue = "enable";
-                                else
-                                    parValue = "disable";
-                                parameter = getParameterFromCommand(command);
-                                if(parameter != null) {
-                                    parameters.replace(parameter, parValue);
-                                    answer = parValue;
-                                } else {
-                                    answer = "unrecognized";
-                                }
-                            } else if (command.startsWith("set")) {
-                                //TODO: add logic
-                                answer = "set";
-                            }
-                            playBenderAnswer(answer);
-                        }
+                        fsmState = processCommand(jsgfRecognizer, fsmState);
                     }
                     break;
                 case 3:
-                    playBenderAnswer("kill all humans");
-                    command = recognizeCommand(jsgfRecognizer);
-                    if(command == "wake up") {
-                        answer = command;
-                        playBenderAnswer(answer);
-                        fsmState = 2;
-                        isSleeping = false;
-                    }
+                    fsmState = processCommand(jsgfRecognizer, fsmState);
                     break;
                 case 10:
                     return;
@@ -169,14 +116,18 @@ public class DialogBender {
         }
     }
 
-    private static String recognizeCommand(LiveSpeechRecognizer jsgfRecognizer)
+    private static int processCommand(LiveSpeechRecognizer jsgfRecognizer, int curfsmState)
             throws NullPointerException
     {
+        if(isPlayingAnswer)
+            return curfsmState;
+
+        int newfsmState = curfsmState;
+        String answer = null;
+        String parameter;
         jsgfRecognizer.startRecognition(true);
         String utterance = jsgfRecognizer.getResult().getHypothesis();
         jsgfRecognizer.stopRecognition();
-        if(isPlayingAnswer)
-            return null;
 
         System.out.println(utterance);
         long curTime = new Date().getTime();
@@ -219,7 +170,64 @@ public class DialogBender {
         } else if (utterance.startsWith("set")) {
             command = utterance;
         }
-        return command;
+
+        if(curfsmState == 1) {
+            if (command != null) {
+                if (command.equals("hey bender")) {
+                    newfsmState = 2;
+                    answer = command;
+                }
+            }
+        }
+
+        if(curfsmState == 2) {
+            if (parameters.get("sleep") == "enable"
+                    && isSleeping) {
+                command = null;
+                newfsmState = 3;
+            }
+            if (command != null) {
+                answer = command;
+                if (command.equals("shutdown")) {
+                    answer = "shutdown";
+                    newfsmState = 10;
+                } else if (command.equals("exit")) {
+                    answer = "exit";
+                    newfsmState = 0;
+                } else if (command.startsWith("enable")
+                        || command.startsWith("disable")) {
+                    String parValue;
+                    if (command.startsWith("enable"))
+                        parValue = "enable";
+                    else
+                        parValue = "disable";
+                    parameter = getParameterFromCommand(command);
+                    if (parameter != null) {
+                        parameters.replace(parameter, parValue);
+                        answer = parValue;
+                    } else {
+                        answer = "unrecognized";
+                    }
+                } else if (command.startsWith("set")) {
+                    //TODO: add logic
+                    answer = "set";
+                }
+            }
+        }
+
+        if(curfsmState == 3) {
+            playBenderAnswer("kill all humans");
+            if (command == "wake up") {
+                answer = command;
+                newfsmState = 2;
+                isSleeping = false;
+            }
+        }
+
+        if(answer != null)
+            playBenderAnswer(answer);
+
+        return newfsmState;
     }
 
     private static void playBenderAnswer(String command) {
