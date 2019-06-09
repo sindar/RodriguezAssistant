@@ -38,6 +38,7 @@ public class DialogBender {
 
     static {
         AUDIO_FILES.put("shutdown", "with_bjah.wav");
+        AUDIO_FILES.put("start", "lets_get_drunk.wav");
         AUDIO_FILES.put("exit", "lets_get_drunk.wav");
         AUDIO_FILES.put("hey bender", "bite.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
@@ -54,6 +55,7 @@ public class DialogBender {
         AUDIO_FILES.put("enable", "can_do.wav");
         AUDIO_FILES.put("disable", "can_do.wav");
         AUDIO_FILES.put("set", "can_do.wav");
+        AUDIO_FILES.put("how are you", "right_now_i_feel_sorry_for_you.wav");
         AUDIO_FILES.put("unrecognized", "beat_children.wav");
         AUDIO_FILES.put("no audio", "silence.wav");
     }
@@ -145,6 +147,8 @@ public class DialogBender {
         } else if (utterance.contains("who are you")) {
             option = curTime % 2;
             command = "who are you " + String.valueOf(option);
+        } else if (utterance.contains("how are you")) {
+            command = "how are you";
         } else if (utterance.contains("where are you from")
                     || utterance.contains("where were you born")) {
             command = "birthplace";
@@ -216,7 +220,7 @@ public class DialogBender {
         }
 
         if(curfsmState == 3) {
-            playBenderAnswer("kill all humans");
+            playBenderPhrase("kill all humans");
             if (command == "wake up") {
                 answer = command;
                 newfsmState = 2;
@@ -225,12 +229,12 @@ public class DialogBender {
         }
 
         if(answer != null)
-            playBenderAnswer(answer);
+            playBenderPhrase(answer);
 
         return newfsmState;
     }
 
-    private static void playBenderAnswer(String command) {
+    private static void playBenderPhrase(String command) {
         if (sleepTimer != null) {
             sleepTimer.cancel();
             sleepTimerTask = null;
