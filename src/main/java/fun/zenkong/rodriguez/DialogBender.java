@@ -75,6 +75,7 @@ public class DialogBender {
         configuration.setGrammarName("bender");
         LiveSpeechRecognizer jsgfRecognizer =
                 new LiveSpeechRecognizer(configuration);
+        jsgfRecognizer.startRecognition(true);
 
         int fsmState;
 
@@ -105,9 +106,11 @@ public class DialogBender {
                     fsmState = processCommand(jsgfRecognizer, fsmState);
                     break;
                 case 10:
+                    jsgfRecognizer.stopRecognition();
                     return;
             }
         }
+
     }
 
 
@@ -127,9 +130,11 @@ public class DialogBender {
         int newfsmState = curfsmState;
         String answer = null;
         String parameter;
-        jsgfRecognizer.startRecognition(true);
+        if(curfsmState == 1) {
+
+        }
+
         String utterance = jsgfRecognizer.getResult().getHypothesis();
-        jsgfRecognizer.stopRecognition();
 
         System.out.println(utterance);
         long curTime = new Date().getTime();
@@ -262,5 +267,4 @@ public class DialogBender {
         else
             return null;
     }
-
 }
