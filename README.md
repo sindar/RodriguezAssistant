@@ -1,2 +1,3 @@
 Your rude personal ASSistant:)
+Java version based on CMU Sphinx 4.
 Work in progress...
