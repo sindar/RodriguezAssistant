@@ -40,7 +40,9 @@ public class DialogBender {
         AUDIO_FILES.put("shutdown", "with_bjah.wav");
         AUDIO_FILES.put("start", "lets_get_drunk.wav");
         AUDIO_FILES.put("exit", "lets_get_drunk.wav");
-        AUDIO_FILES.put("hey bender", "bite.wav");
+        AUDIO_FILES.put("hey bender 0", "bite.wav");
+        AUDIO_FILES.put("hey bender 1", "hello.wav");
+        AUDIO_FILES.put("hey bender 2", "hello_peasants.wav");
         AUDIO_FILES.put("birthplace", "born_in_tijuana.wav");
         AUDIO_FILES.put("birthdate", "birthdate.wav");
         AUDIO_FILES.put("who are you 0", "im_bender.wav");
@@ -162,8 +164,11 @@ public class DialogBender {
             command = "birthdate";
         } else if (utterance.endsWith("your favorite animal")) {
             command = "animal";
-        } else if (utterance.endsWith("bender")) {
-            command = "hey bender";
+        } else if (utterance.endsWith("bender") &&
+                    (utterance.contains("hi") || utterance.contains("hey")
+                     || utterance.contains("hello"))) {
+            option = curTime % 3;
+            command = "hey bender " + String.valueOf(option);;
         } else if (utterance.contains("magnet")) {
             option = curTime % 2;
             command = "magnet " + String.valueOf(option);
@@ -182,7 +187,7 @@ public class DialogBender {
 
         if(curfsmState == 1) {
             if (command != null) {
-                if (command.equals("hey bender")) {
+                if (command.contains("hey bender")) {
                     newfsmState = 2;
                     answer = command;
                 }
